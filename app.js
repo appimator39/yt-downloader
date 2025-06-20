@@ -263,7 +263,7 @@ function checkProxies(proxy) {
                 if (errorMessage.includes('403') || errorMessage.includes('429') || errorMessage.includes("not a bot")) {
                     console.log(`Proxy blocked: ${proxy}`);
                     await Proxy.update(
-                        { status: 'blocked' },
+                        { status: 'working' },
                         { where: { address: proxy } }
                     );
                     resetProxyCache();
@@ -330,7 +330,7 @@ async function startBlockProxyChecker() {
         try {
             // Look for proxies with status 'unchecked' only
             const oneHourAgo = moment().subtract(1, 'hours').toDate();
-            const proxy = await Proxy.findOne({ where: { status: 'blocked', updatedAt: { [Op.lte]: oneHourAgo } } });
+            const proxy = await Proxy.findOne({ where: { status: 'working', updatedAt: { [Op.lte]: oneHourAgo } } });
             if (proxy) {
                 console.log(`Checking proxy: ${proxy.address}`);
                 try {
@@ -640,7 +640,7 @@ io.on('connection', (socket) => {
             await Proxy.destroy({ where: { address: proxies } });
 
             // Add new proxies to the database
-            const newProxies = proxies.map((address) => ({ address, status: 'unchecked' }));
+            const newProxies = proxies.map((address) => ({ address, status: 'working' }));
             await Proxy.bulkCreate(newProxies, { ignoreDuplicates: true });
 
             // Emit success to the client
