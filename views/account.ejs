@@ -1,0 +1,22 @@
+<% title = "Account" %>
+<%- include('header.ejs') %>
+<div class="container-fluid">
+    <div class="row h-100 align-items-center justify-content-center" style="min-height: 100vh;">
+        <div class="col-12 col-sm-8 col-md-5">
+            <form action="/admin/panel/account" class="bg-light rounded p-4 p-sm-5 my-4 mx-3" method="POST">
+                <div class="form-floating mb-3">
+                    <!-- Set email field value dynamically from the data -->
+                    <input type="email" name="email" class="form-control" id="floatingInput" placeholder="name@example.com" value="<%= data.email %>" required>
+                    <label for="floatingInput">Email address</label>
+                </div>
+                <div class="form-floating mb-4">
+                    <!-- Set password field value dynamically if required -->
+                    <input type="text" value="<%= data.password %>" name="password" class="form-control" id="floatingPassword" placeholder="Password" required>
+                    <label for="floatingPassword">Password</label>
+                </div>
+                <button type="submit" class="btn btn-primary py-3 w-100 mb-4">Save Changes</button>
+            </form>
+        </div>
+    </div>
+</div>
+<%- include('footer.ejs') %>

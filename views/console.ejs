@@ -1,0 +1,22 @@
+<% title = "Dashboard" %>
+<%- include('header.ejs') %>
+
+<div class="p-2">
+    <div class="w-100 px-2 pt-2 pb-5 d-flex flex-column" id="console" style="background-color: #282A36; height: calc(100vh - 80px); overflow-y: auto;">
+    </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    const socket = io();
+    
+    socket.on('console', (response) => {
+        $("#console").append(response.message);
+        
+        // Scroll to bottom after new message is added
+        $("#console").scrollTop($("#console")[0].scrollHeight);
+    });
+</script>
+
+<%- include('footer.ejs') %>

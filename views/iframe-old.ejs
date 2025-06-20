@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Youtube Video Downloader</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: sans-serif;
+        }
+
+        body {
+            background-color: #F9FAFB;
+        }
+
+        .loader {
+            width: 90px;
+            padding: 12px;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            background-color: #08AEEA; background-image: linear-gradient(0deg, #08AEEA 0%, #2AF598 100%);
+            --_m:
+                conic-gradient(#0000 10%, #000),
+                linear-gradient(#000 0 0) content-box;
+            -webkit-mask: var(--_m);
+            mask: var(--_m);
+            -webkit-mask-composite: source-out;
+            mask-composite: subtract;
+            animation: l3 1s infinite linear;
+        }
+
+
+         .prepairing-loader {
+            width: 16px;
+            height: 16px;
+            border: 3px solid #2AF598;
+            border-bottom-color: transparent;
+            border-radius: 50%;
+            display: inline-block;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
+            }
+        
+            @keyframes rotation {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+            } 
+
+        main {
+            padding: 20px !important;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 700px;
+            max-width: 90% !important;
+            margin: 10px auto !important;
+            background-color: white !important;
+            border-radius: 20px;
+            gap: 15px;
+            box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+        }
+
+        img {
+            height: 230px;
+            border-radius: 15px;
+            max-width: 100% !important;
+            box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+            width: 400px;
+        }
+
+        .mp3-mp4-btn {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        /*background-color: #08AEEA; background-image: linear-gradient(0deg, #08AEEA 0%, #2AF598 100%);*/
+        .mp3-mp4-btn button {
+            outline: none !important;
+            border: none !important;
+            background-color: #08AEEA; background-image: linear-gradient(0deg, #08AEEA 0%, #2AF598 100%);
+            border-radius: 7px;
+            cursor: pointer;
+            box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+            padding: 2px;
+        }
+        
+        
+        .mp3-mp4-btn button span{
+            color: #2AF598;
+            font-weight: bold;
+            font-size: 20px;
+            padding: 12px 20px;
+            display: block;
+            background-color: #F9FAFB;
+            border-radius: 7px;
+        }
+        
+        .mp3-mp4-btn .active span {
+            color: white !important;
+            background-color: transparent !important;
+        }
+        .record {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 15px;
+            box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+            padding: 8px;
+            background-color: #F9FAFB;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        
+
+        .record button {
+            outline: none !important;
+            border: none !important;
+            cursor: pointer;
+            box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+            background-color: #08AEEA; background-image: linear-gradient(0deg, #08AEEA 0%, #2AF598 100%);
+            border-radius: 9px;
+            font-weight: bold;
+            font-size: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            padding: 3px;
+        }
+
+        .record button:hover span{
+            background: transparent !important;
+            color: white !important;
+
+        }
+
+        .record span {
+           padding: 10px;
+           background-color: #F9FAFB;
+           min-width: 120px;
+           border-radius: 7px;
+           color: #2AF598;
+           font-weight: bold;
+           font-size: 16px;
+           transition-property: all;
+            transition-duration: 1s;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Splash Screen (Visible initially) -->
+    <div id="spalshScreen"
+        style="position: absolute;top: 0px;left: 0px;width: 100%;height: 100vh;display: flex;justify-content: center;align-items: center;z-index: 1000;background-color: inherit;">
+        <div class="loader"></div>
+    </div>
+
+    <!-- Main Content -->
+    <main id="mainScreen">
+        <img src="<%= thumbnail %>" alt="Thumbnail">
+        <h1 style="text-align: center;" id="title"></h1>
+        <div class="mp3-mp4-btn">
+            <button id="mp3Btn" class="active">
+                <span>MP3</span>
+            </button>
+            <button id="mp4Btn">
+                <span>MP4</span>
+            </button>
+        </div>
+
+        <!-- MP3 Records -->
+        <div id="mp3Records" style="width: 100%;padding: 10px 8px;">
+            <div class="record" style="justify-content: space-between;display: flex;">
+                <strong style="font-size: 18px;font-weight: bold;width: calc(50% - 60px);display: block;">Quality</strong>
+                <strong style="font-size: 18px;font-weight: bold;width: calc(50% - 60px);display: block;text-indent: 26px;">Format</strong>
+                <strong style="font-size: 18px;font-weight: bold;min-width: 120px;text-align: center;">Action</strong>
+            </div>
+            <div class="record">
+                <strong>320kbps</strong>
+                <div style="display: flex;justify-content: center;">
+                    <strong>MP3</strong>
+                </div>
+                <div style="display: flex;justify-content: end;">
+                    <button>
+                        <span>Convert</span>
+                    </button>
+                </div>
+            </div>
+            <div class="record">
+                <strong>256kbps</strong>
+                <div style="display: flex;justify-content: center;">
+                    <strong>MP3</strong>
+                </div>
+                <div style="display: flex;justify-content: end;">
+                    <button>
+                        <span>Convert</span>
+                    </button>
+                </div>
+            </div>
+            <div class="record">
+                <strong>192kbps</strong>
+                <div style="display: flex;justify-content: center;">
+                    <strong>MP3</strong>
+                </div>
+                <div style="display: flex;justify-content: end;">
+                    <button>
+                        <span>Convert</span>
+                    </button>
+                </div>
+            </div>
+            <div class="record">
+                <strong>128kbps</strong>
+                <div style="display: flex;justify-content: center;">
+                    <strong>MP3</strong>
+                </div>
+                <div style="display: flex;justify-content: end;">
+                    <button>
+                        <span>Convert</span>
+                    </button>
+                </div>
+            </div>
+            <div class="record">
+                <strong>64kbps</strong>
+                <div style="display: flex;justify-content: center;">
+                    <strong>MP3</strong>
+                </div>
+                <div style="display: flex;justify-content: end;">
+                    <button>
+                        <span>Convert</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MP4 Records -->
+        <div id="mp4Records" style="width: 100%; display: none;">
+            <div class="record" style="justify-content: space-between;display: flex;">
+                <strong style="font-size: 18px;font-weight: bold;width: calc(50% - 60px);display: block;">Quality</strong>
+                <strong style="font-size: 18px;font-weight: bold;width: calc(50% - 60px);display: block;text-indent: 26px;">Format</strong>
+                <strong style="font-size: 18px;font-weight: bold;min-width: 120px;text-align: center;">Action</strong>
+            </div>
+            <div class="record">
+                <strong>1080p</strong>
+                <div style="display: flex;justify-content: center;">
+                    <strong>MP4</strong>
+                </div>
+                <div style="display: flex;justify-content: end;">
+                    <button>
+                        <span>Download</span>
+                    </button>
+                </div>
+            </div>
+            <div class="record">
+                <strong>720p</strong>
+                <div style="display: flex;justify-content: center;">
+                    <strong>MP4</strong>
+                </div>
+                <div style="display: flex;justify-content: end;">
+                    <button>
+                        <span>Download</span>
+                    </button>
+                </div>
+            </div>
+            <div class="record">
+                <strong>480p</strong>
+                <div style="display: flex;justify-content: center;">
+                    <strong>MP4</strong>
+                </div>
+                <div style="display: flex;justify-content: end;">
+                    <button>
+                        <span>Download</span>
+                    </button>
+                </div>
+            </div>
+            <div class="record">
+                <strong>360p</strong>
+                <div style="display: flex;justify-content: center;">
+                    <strong>MP4</strong>
+                </div>
+                <div style="display: flex;justify-content: end;">
+                    <button>
+                        <span>Download</span>
+                    </button>
+                </div>
+            </div>
+            <div class="record">
+                <strong>240p</strong>
+                <div style="display: flex;justify-content: center;">
+                    <strong>MP4</strong>
+                </div>
+                <div style="display: flex;justify-content: end;">
+                    <button>
+                        <span>Download</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        // MP3 button click event
+        document.getElementById('mp3Btn').addEventListener('click', function () {
+            // Show MP3 records and hide MP4 records
+            document.getElementById('mp3Records').style.display = 'block';
+            document.getElementById('mp4Records').style.display = 'none';
+
+            // Add active class to MP3 button and remove from MP4 button
+            document.getElementById('mp3Btn').classList.add('active');
+            document.getElementById('mp4Btn').classList.remove('active');
+        });
+
+        // MP4 button click event
+        document.getElementById('mp4Btn').addEventListener('click', function () {
+            // Show MP4 records and hide MP3 records
+            document.getElementById('mp4Records').style.display = 'block';
+            document.getElementById('mp3Records').style.display = 'none';
+
+            // Add active class to MP4 button and remove from MP3 button
+            document.getElementById('mp4Btn').classList.add('active');
+            document.getElementById('mp3Btn').classList.remove('active');
+        });
+        const socket = io();
+        let mp3CurrentButton = null;
+        let mp3CurrentURL = null;
+        let mp4CurrentButton = null;
+        let mp4CurrentURL = null;
+        socket.emit('fetchingData', { "url": `<%= url %>` });
+        socket.on('data', (response) => {
+            document.getElementById('spalshScreen').style.display = "none";
+            document.getElementById("mainScreen").style.display = "flex";
+            document.getElementById("title").innerHTML = response.title;
+            let mp3_download_buttons = document.querySelectorAll("#mp3Records .record button");
+            mp3_download_buttons.forEach(btn => {
+                btn.setAttribute("onclick", `download_mp3("${response.hash}",this)`);
+            });
+            let mp4_download_buttons = document.querySelectorAll("#mp4Records .record button");
+            mp4_download_buttons.forEach(btn => {
+                btn.setAttribute("onclick", `download_mp4("${response.hash}",this)`);
+            });
+        });
+        function download_mp3(hash, button) {
+            mp3CurrentButton = button;
+            let buttons = document.querySelectorAll("#mp3Records .record button");
+            buttons.forEach(btn => {
+                btn.disabled = true;
+            });
+            button.innerHTML = "<span>Prepairing</span><div class='prepairing-loader'></div>";
+            if (mp3CurrentURL === null) {
+                socket.emit('download_audio', { hash });
+            } else {
+                let percentage = 1;
+                button.innerHTML = `<span>Converting... ${percentage}%</span>`;
+
+                let fakeProgressInterval = setInterval(() => {
+                    if (percentage < 100) {
+                        percentage++;
+                        button.innerHTML = `<span>Converting... ${percentage}%</span>`;
+                    } else {
+                        clearInterval(fakeProgressInterval);
+                        button.innerHTML = "<span>Download Again</span>";
+                        buttons.forEach(btn => {
+                            btn.disabled = false;
+                        });
+                        button.setAttribute("onclick", `window.location.href = '${mp3CurrentURL}'`)
+                        mp3CurrentButton.click()
+                    }
+                }, 30);
+            }
+
+        }
+        function download_mp4(hash, button) {
+            mp4CurrentButton = button;
+            let buttons = document.querySelectorAll("#mp4Records .record button");
+            buttons.forEach(btn => {
+                btn.disabled = true;
+            });
+            button.innerHTML = "<span>Prepairing <div class='prepairing-loader'></div></span>";;
+            if (mp4CurrentURL === null) {
+                socket.emit('download_video', { hash });
+            } else {
+                let percentage = 1;
+                button.innerHTML = `<span>Downloading... ${percentage}%</span>`;
+
+                let fakeProgressInterval = setInterval(() => {
+                    if (percentage < 100) {
+                        percentage++;
+                        button.innerHTML = `<span>Downloading... ${percentage}%</span>`;
+                    } else {
+                        clearInterval(fakeProgressInterval);
+                        button.innerHTML = "<span>Download Again</span>";
+                        buttons.forEach(btn => {
+                            btn.disabled = false;
+                        });
+                        button.setAttribute("onclick", `window.location.href = '${mp4CurrentURL}'`)
+                        mp4CurrentButton.click()
+                    }
+                }, 30);
+            }
+        }
+        socket.on('mp3_progress', (response) => {
+            mp3CurrentButton.innerHTML = `<span>Converting... <strong>${response.progress}%</strong></span>`
+        })
+        socket.on('mp4_progress', (response) => {
+            mp4CurrentButton.innerHTML = `<span>Downloading... <strong>${response.progress}%</strong></span>`
+        })
+        socket.on('complete_mp3', (response) => {
+            mp3CurrentURL = `/download/audio/${response.hash}`
+            mp3CurrentButton.innerHTML = "<span>Download Again</span>";
+            let mp3_download_buttons = document.querySelectorAll("#mp3Records .record button");
+            mp3_download_buttons.forEach(btn => {
+                btn.disabled = false;
+            });
+            mp3CurrentButton.setAttribute("onclick", `window.location.href = '/download/audio/${response.hash}'`)
+            mp3CurrentButton.click()
+        })
+        socket.on('complete_mp4', (response) => {
+            mp4CurrentURL = `/download/video/${response.hash}`
+            mp4CurrentButton.innerHTML = "<span>Download Again</span>";
+            let mp4_download_buttons = document.querySelectorAll("#mp4Records .record button");
+            mp4_download_buttons.forEach(btn => {
+                btn.disabled = false;
+            });
+            mp4CurrentButton.setAttribute("onclick", `window.location.href = '/download/video/${response.hash}'`)
+            mp4CurrentButton.click()
+        })
+
+    </script>
+    <%- ad_code %>
+</body>
+
+</html>

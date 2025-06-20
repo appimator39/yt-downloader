@@ -1,0 +1,393 @@
+<% title = "Proxies" %>
+<%- include('header.ejs') %>
+<div class="container-fluid pt-4 px-4">
+    <div class="d-flex justify-content-between">
+        <button class="btn btn-secondary mb-4" onclick="window.location.href='/admin/panel/reset/logs'">Reset Logs</button>
+        <div class="dropdown">
+            <button class="btn btn-success dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Export
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="/admin/panel/proxies/export/all">All</a></li>
+                <li><a class="dropdown-item" href="/admin/panel/proxies/export/blocked">Blocked</a></li>
+                <li><a class="dropdown-item" href="/admin/panel/proxies/export/working">Working</a></li>
+                <li><a class="dropdown-item" href="/admin/panel/proxies/export/unchecked">Unchecked</a></li>
+            </ul>
+          </div>
+        <div class="dropdown">
+            <button class="btn btn-danger dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Delete
+            </button>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="javascript:void(0);" onclick="deleteProxies('all')">All</a></li>
+              <li><a class="dropdown-item" href="javascript:void(0);" onclick="deleteProxies('blocked')">Blocked</a></li>
+              <li><a class="dropdown-item" href="javascript:void(0);" onclick="deleteProxies('working')">Working</a></li>
+              <li><a class="dropdown-item" href="javascript:void(0);" onclick="deleteProxies('unchecked')">Unchecked</a></li>
+            </ul>
+          </div>
+        <button class="btn btn-primary mb-4"  data-bs-toggle="modal" data-bs-target="#addIProxyModal">Add Proxies</button>
+    </div>
+    <div class="modal fade" id="addIProxyModal" data-bs-backdrop="static" data-bs-keyboard="false"
+                    tabindex="-1" aria-labelledby="addIProxyModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div>
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="addIProxyModalLabel">Add New Proxies</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <label for="proxies">username:password@111.111.111.111:8080</label>
+                                    <div class="mb-3">
+                                        <textarea class="form-control" id="proxies"></textarea>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                    <button type="button" class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+    
+                <!-- Statistics Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card text-center p-4 shadow-sm rounded">
+                <i class="fas fa-server fa-2x text-primary mb-2"></i>
+                <h5>Total Proxies</h5>
+                <h4><%= data.totalProxies %></h4>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center p-4 shadow-sm rounded">
+                <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                <h5>Working</h5>
+                <h4><%= data.totalWorking %></h4>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center p-4 shadow-sm rounded">
+                <i class="fas fa-ban fa-2x text-danger mb-2"></i>
+                <h5>Blocked</h5>
+                <h4><%= data.totalBlocked %></h4>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center p-4 shadow-sm rounded">
+                <i class="fas fa-question-circle fa-2x text-warning mb-2"></i>
+                <h5>Unchecked</h5>
+                <h4><%= data.totalUnchecked %></h4>
+            </div>
+        </div>
+    </div>
+
+    <!-- Proxies Table -->
+    <div class="bg-light rounded shadow-sm p-4">
+        <h5 class="mb-4">Proxies</h5>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>S.No</th>
+                    <th>Address</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% data.proxies.forEach((proxy, index) => { %>
+                    <tr>
+                        <td><%= index + 1 %></td>
+                        <td><%= proxy.address %></td>
+                        <td>
+                            <% if (proxy.status === 'working') { %>
+                                <span class="badge bg-success">Working</span>
+                            <% } else if (proxy.status === 'blocked') { %>
+                                <span class="badge bg-danger">Blocked</span>
+                            <% }else if (proxy.status === 'errored') { %>
+                                <span class="badge bg-secondary">Errored</span>
+                            <% } else { %>
+                                <span class="badge bg-warning text-dark">Unchecked</span>
+                            <% } %>
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-primary edit-btn" data-id="<%= proxy.id %>" data-address="<%= proxy.address %>" data-bs-toggle="modal" data-bs-target="#editProxyModal">Edit</button>
+                            <button class="btn btn-sm btn-danger delete-btn" data-id="<%= proxy.id %>">Delete</button>
+                        </td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+</div>
+
+
+
+
+
+<!-- Edit Proxy Modal -->
+<div class="modal fade" id="editProxyModal" tabindex="-1" aria-labelledby="editProxyModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editProxyModalLabel">Edit Proxy</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" class="form-control" id="editProxyAddress" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="saveEditProxy">Save Changes</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    let editor;
+    const socket = io(); // Connect to Socket.IO
+
+    const modal = document.getElementById('addIProxyModal');
+    modal.addEventListener('shown.bs.modal', () => {
+        editor = CodeMirror.fromTextArea(document.getElementById('proxies'), {
+            lineNumbers: true,
+            mode: "javascript",
+            theme: "default",
+        });
+        editor.setSize(null, 400);
+    });
+
+    const submitButton = document.querySelector('.modal-footer .btn-primary');
+    const spinner = document.createElement('span');
+    spinner.className = 'spinner-border spinner-border-sm ms-2';
+    spinner.setAttribute('role', 'status');
+    spinner.setAttribute('aria-hidden', 'true');
+
+    // Helper: Format proxies
+    function formatProxies(content) {
+        return content
+            .split('\n')
+            .map((proxy) => proxy.trim())
+            .filter((proxy) => proxy !== '')
+            .map((proxy) => {
+                const splitProxy = proxy.split(':');
+                if (splitProxy.length === 4) {
+                    return `${splitProxy[2]}:${splitProxy[3]}@${splitProxy[0]}:${splitProxy[1]}`;
+                }
+                return proxy;
+            });
+    }
+
+    // Handle submit
+    submitButton.addEventListener('click', () => {
+        const content = editor.getValue().trim();
+
+        if (!content) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error',
+                text: 'Proxies cannot be empty!',
+            });
+            return;
+        }
+
+        const formattedProxies = formatProxies(content);
+
+        // Disable button and show spinner
+        submitButton.disabled = true;
+        submitButton.appendChild(spinner);
+
+        // Emit proxies to server via Socket.IO
+        socket.emit('addProxies', { proxies: formattedProxies });
+
+        socket.on('proxiesAdded', (response) => {
+            submitButton.disabled = false;
+            spinner.remove();
+
+            if (response.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: 'Proxies added successfully!',
+                }).then(() => {
+                    location.reload();
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: response.message || 'Failed to add proxies. Please try again.',
+                });
+            }
+        });
+
+        socket.on('error', (error) => {
+            submitButton.disabled = false;
+            spinner.remove();
+
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'An unexpected error occurred.',
+            });
+            console.error(error);
+        });
+    });
+});
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.delete-btn').forEach(button => {
+        button.addEventListener('click', function () {
+            const proxyId = this.dataset.id;
+
+            // SweetAlert confirmation
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'This proxy will be permanently deleted!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Perform delete request
+                    fetch(`/admin/panel/proxies/delete/${proxyId}`, { method: 'DELETE' })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire(
+                                    'Deleted!',
+                                    'The proxy has been deleted.',
+                                    'success'
+                                ).then(() => {
+                                    location.reload(); // Reload page after success
+                                });
+                            } else {
+                                Swal.fire(
+                                    'Error!',
+                                    'Failed to delete the proxy. Please try again.',
+                                    'error'
+                                );
+                            }
+                        })
+                        .catch(err => {
+                            Swal.fire(
+                                'Error!',
+                                'Something went wrong. Please try again later.',
+                                'error'
+                            );
+                        });
+                }
+            });
+        });
+    });
+
+    const editProxyModal = document.getElementById('editProxyModal');
+
+editProxyModal.addEventListener('show.bs.modal', function (event) {
+    const button = event.relatedTarget;
+    const proxyId = button.getAttribute('data-id');
+    const address = button.getAttribute('data-address');
+    document.getElementById('editProxyAddress').value = address;
+
+    document.getElementById('saveEditProxy').onclick = function () {
+        const newAddress = document.getElementById('editProxyAddress').value.trim();
+
+        if (!newAddress) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Invalid Input',
+                text: 'Proxy address cannot be empty!',
+            });
+            return;
+        }
+
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "Do you want to update this proxy?",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, update it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/admin/panel/proxies/edit/${proxyId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ address: newAddress })
+                }).then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Updated!',
+                                text: 'The proxy has been updated successfully.',
+                            }).then(() => location.reload());
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Failed!',
+                                text: 'Failed to update the proxy. Please try again.',
+                            });
+                        }
+                    }).catch(() => {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: 'An error occurred while updating the proxy.',
+                        });
+                    });
+            }
+        });
+    };
+});
+
+
+
+
+});
+
+
+
+function deleteProxies(type) {
+    Swal.fire({
+        title: "Are you sure?",
+        text: `Do you really want to delete ${type} proxies? This action cannot be undone!`,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, delete it!"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch("/admin/panel/proxies/delete", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ type })
+            })
+            .then(response => response.json())
+            .then(data => {
+                Swal.fire("Deleted!", data.message, "success").then(() => location.reload());
+            });
+        }
+    });
+}
+
+</script>
+
+    
+    
+<%- include('footer.ejs') %>
